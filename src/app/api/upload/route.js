@@ -7,11 +7,7 @@ import { fileURLToPath } from 'url';
 
 const pump = promisify(pipeline);
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+
 
 export async function POST(req) {
   try {
