@@ -1,32 +1,35 @@
-import { NextResponse } from 'next/server';
 import fs from 'fs';
-import { pipeline } from 'stream';
 import { promisify } from 'util';
+import path from 'path';
+import { NextResponse } from 'next/server';
 
-const pump = promisify(pipeline);
-
-
+const writeFile = promisify(fs.writeFile);
 
 export async function POST(req) {
   try {
     const formData = await req.formData();
-    const file = formData.get('file'); 
-    const filePath = `./public/${file.name}`;
+    const file = formData.get('file');
 
-    console.log(__dirname)
+    if (!file || !file.stream) {
+      throw new Error('File is not valid');
+    }
 
-
-    const uploadDir = './public';
+    const uploadDir = './uploads';
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    await pump(file.stream(), fs.createWriteStream(filePath));
+    const fileName = `${Date.now()}_${file.name}`;
+    const filePath = path.join(uploadDir, fileName);
 
-    const publicPath = `/${file.name}`;
-    return NextResponse.json({ status: "success", data: publicPath });
+    const fileBuffer = await file.arrayBuffer();
+    await writeFile(filePath, Buffer.from(fileBuffer));
+
+  
+    const fileData = fs.readFileSync(filePath,{encoding: 'base64'});
+    return NextResponse.json({status:200,data:fileData});
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ status: "fail", data: e.message });
+    return NextResponse.json({ status: 'fail', data: e.message });
   }
 }

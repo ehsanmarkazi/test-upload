@@ -1,5 +1,4 @@
 "use client"
-import Image from 'next/image';
 import { useState } from 'react';
 
 export default function UploadPage() {
@@ -21,8 +20,15 @@ export default function UploadPage() {
     });
 
     const data = await res.json();
+
     console.log(data.data)
-    setImageUrl(data.data);
+    setImageUrl(`data:image/jpeg;base64,${data.data}`);
+
+    // if (data.status === 'success') {
+    //   setImageUrl(`${data.data}`);
+    // } else {
+    //   console.error(data.data);
+    // }
   };
 
   return (
@@ -35,7 +41,7 @@ export default function UploadPage() {
       {imageUrl && (
         <div>
           <h3>Uploaded Image:</h3>
-          <Image src={imageUrl} alt="Uploaded" width={500} height={500} className='bg-error'/>
+          <img src={imageUrl} alt="Uploaded" width={500} height={500} />
         </div>
       )}
     </div>
